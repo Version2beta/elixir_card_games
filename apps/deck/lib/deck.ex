@@ -1,4 +1,4 @@
-defmodule CardGames.Deck do
+defmodule Deck do
   @moduledoc """
   Creates decks of cards and provides functions that can be performed on one or more decks.
   """
@@ -57,8 +57,34 @@ defmodule CardGames.Deck do
   @spec new() :: deck
   def new(), do: @deck
 
+  @spec new(integer()) :: deck
+  def new(multiple) when is_integer(multiple) and multiple > 0 do
+    for _ <- 1..multiple, card <- @deck, do: card
+  end
+
   @spec shuffle(deck) :: deck
   def shuffle(deck), do: Enum.shuffle(deck)
+
+  @spec deal(deck, integer, integer) :: {:ok, list(cards), cards}
+  def deal(deck, count_hands, count_cards) do
+    acc = {for(_hand <- 1..count_hands, do: []), deck}
+
+    {hands, deck} =
+      Enum.reduce(1..count_cards, acc, fn _, {hands, deck} ->
+        Enum.reduce(hands, {[], deck}, fn hand, {round, deck} ->
+          {deck, card} = deal_one(deck)
+          {round ++ [hand ++ [card]], deck}
+        end)
+      end)
+
+    with false <- Enum.any?(List.flatten(hands), fn card -> is_nil(card) end) do
+      {:ok, hands, deck}
+    else
+      _ ->
+        dealt = Enum.map(hands, fn hand -> Enum.filter(hand, fn card -> not is_nil(card) end) end)
+        {:insufficient_deck, dealt, deck}
+    end
+  end
 
   @spec to_notation(list(cards)) :: binary()
   def to_notation(cards), do: to_notation(:string, cards)
@@ -69,5 +95,13 @@ defmodule CardGames.Deck do
       Keyword.get(@suits_and_notations, suit) <> Keyword.get(@ranks_and_notations, rank)
     end)
     |> Enum.join(" ")
+  end
+
+  @spec deal_one(cards) :: {cards, card | nil}
+  def deal_one([]), do: {[], nil}
+
+  def deal_one(cards) when is_list(cards) do
+    card = Enum.random(cards)
+    {cards -- [card], card}
   end
 end

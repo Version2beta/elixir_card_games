@@ -1,6 +1,5 @@
-defmodule CardGames.DeckTest do
+defmodule DeckTest do
   use ExUnit.Case
-  alias CardGames.Deck
 
   test "By default, a deck comes ordered in a predictable way" do
     assert Deck.new() == Deck.new()
@@ -55,5 +54,40 @@ defmodule CardGames.DeckTest do
     Enum.each(cards, fn card ->
       assert Deck.to_notation([card]) in notation_list
     end)
+  end
+
+  test "Creates decks of more than one standard deck" do
+    multiples = :rand.uniform(10)
+    decks = Deck.new(multiples)
+    assert Enum.count(decks) == multiples * 52
+  end
+
+  test "Deals a given number of hands of a given number of cards from a deck" do
+    deck = Deck.new()
+    count_hands = :rand.uniform(5)
+    count_cards = :rand.uniform(10)
+    {:ok, hands, deck} = Deck.deal(deck, count_hands, count_cards)
+    assert Enum.count(hands) == count_hands
+
+    Enum.each(hands, fn hand ->
+      assert Enum.count(hand) == count_cards
+    end)
+
+    assert Enum.count(deck) == 52 - count_hands * count_cards
+  end
+
+  test "When asked to deal more cards than available, returns a warning" do
+    deck = Deck.new()
+    count_hands = :rand.uniform(3) + 2
+    count_cards = 18
+    {:insufficient_deck, hands, deck} = Deck.deal(deck, count_hands, count_cards)
+    assert Enum.count(deck) == 0
+
+    assert Enum.count(hands) == count_hands
+
+    refute Enum.map(hands, fn hand ->
+             Enum.count(hand) == count_cards
+           end)
+           |> Enum.all?()
   end
 end

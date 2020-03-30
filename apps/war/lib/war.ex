@@ -3,6 +3,8 @@ defmodule War do
   Documentation for `War`.
   """
 
+  require Logger
+
   @type t :: %__MODULE__{hand1: Deck.cards(), hand2: Deck.cards(), pot: Deck.cards()}
   defstruct hand1: [], hand2: [], pot: []
 
@@ -32,30 +34,30 @@ defmodule War do
       |> Deck.deal(2, 26 * decks)
 
     state = %__MODULE__{hand1: hand1, hand2: hand2, pot: []}
-    log(:game_begins, state)
     tick(state)
   end
 
-  def tick(%__MODULE__{hand2: []} = state) do
+  def tick(%__MODULE__{hand2: []}) do
+    Logger.info("Player 1 wins")
     :player1_wins
   end
 
-  def tick(%__MODULE__{hand1: []} = state) do
+  def tick(%__MODULE__{hand1: []}) do
+    Logger.info("Player 2 wins")
     :player2_wins
   end
 
   def tick(%__MODULE__{hand1: [card1 | _], hand2: [card2 | _]} = state) do
+    log(state)
+
     cond do
       value(card1) > value(card2) ->
-        log(:player1, state)
         battle_to_p1(state) |> tick()
 
       value(card2) > value(card1) ->
-        log(:player2, state)
         battle_to_p2(state) |> tick()
 
       value(card1) == value(card2) ->
-        log(:war, state)
         battle_to_war(state) |> tick()
     end
   end
@@ -87,9 +89,11 @@ defmodule War do
     }
   end
 
-  defp log(condition, %__MODULE__{hand1: hand1, hand2: hand2}),
+  defp log(%__MODULE__{hand1: hand1, hand2: hand2}),
     do:
-      {condition,
-       {{List.first(hand1), Enum.count(hand1)}, {List.first(hand2), Enum.count(hand2)}}}
-      |> IO.inspect()
+      Logger.info(
+        "#{List.first(hand1) |> Deck.to_notation()} (of #{Enum.count(hand1)}) vs #{
+          List.first(hand2) |> Deck.to_notation()
+        } (of #{Enum.count(hand2)})"
+      )
 end

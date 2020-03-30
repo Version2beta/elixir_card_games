@@ -92,8 +92,7 @@ defmodule War do
   defp log(%__MODULE__{hand1: hand1, hand2: hand2}),
     do:
       Logger.info(
-        "#{List.first(hand1) |> Deck.to_notation()} (of #{Enum.count(hand1)}) vs #{
-          List.first(hand2) |> Deck.to_notation()
-        } (of #{Enum.count(hand2)})"
+        "#{List.first(hand1) |> Deck.to_notation()} (of #{Enum.count(hand1)}) " <>
+          "vs #{List.first(hand2) |> Deck.to_notation()} (of #{Enum.count(hand2)})"
       )
 end

@@ -72,7 +72,7 @@ defmodule Deck do
     {hands, deck_remaining} =
       Enum.reduce(1..count_cards, acc, fn _, {hands, deck} ->
         Enum.reduce(hands, {[], deck}, fn hand, {round, deck} ->
-          {deck, card} = deal_one(deck)
+          {deck, card} = draw_one(deck)
           {round ++ [hand ++ [card]], deck}
         end)
       end)
@@ -97,10 +97,10 @@ defmodule Deck do
     |> Enum.join(" ")
   end
 
-  @spec deal_one(cards) :: {cards, card | nil}
-  def deal_one([]), do: {[], nil}
+  @spec draw_one(cards) :: {cards, card | nil}
+  def draw_one([]), do: {[], nil}
 
-  def deal_one([card | cards]) when is_list(cards) do
+  def draw_one([card | cards]) when is_list(cards) do
     {cards, card}
   end
 end

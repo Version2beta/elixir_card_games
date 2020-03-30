@@ -69,7 +69,7 @@ defmodule Deck do
   def deal(deck, count_hands, count_cards) do
     acc = {for(_hand <- 1..count_hands, do: []), deck}
 
-    {hands, deck} =
+    {hands, deck_remaining} =
       Enum.reduce(1..count_cards, acc, fn _, {hands, deck} ->
         Enum.reduce(hands, {[], deck}, fn hand, {round, deck} ->
           {deck, card} = deal_one(deck)
@@ -78,7 +78,7 @@ defmodule Deck do
       end)
 
     with false <- Enum.any?(List.flatten(hands), fn card -> is_nil(card) end) do
-      {:ok, hands, deck}
+      {:ok, hands, deck_remaining}
     else
       _ ->
         dealt = Enum.map(hands, fn hand -> Enum.filter(hand, fn card -> not is_nil(card) end) end)
@@ -100,8 +100,7 @@ defmodule Deck do
   @spec deal_one(cards) :: {cards, card | nil}
   def deal_one([]), do: {[], nil}
 
-  def deal_one(cards) when is_list(cards) do
-    card = Enum.random(cards)
-    {cards -- [card], card}
+  def deal_one([card | cards]) when is_list(cards) do
+    {cards, card}
   end
 end

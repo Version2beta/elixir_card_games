@@ -58,8 +58,13 @@ defmodule DeckTest do
 
   test "Creates decks of more than one standard deck" do
     multiples = :rand.uniform(10)
+    standard_deck = Deck.new()
     decks = Deck.new(multiples)
-    assert Enum.count(decks) == multiples * 52
+
+    Enum.each(0..(multiples - 1), fn index ->
+      {_, d} = Enum.split(decks, index * Enum.count(standard_deck))
+      assert Enum.take(d, Enum.count(standard_deck)) == standard_deck
+    end)
   end
 
   test "Deals a given number of hands of a given number of cards from a deck" do
@@ -76,12 +81,12 @@ defmodule DeckTest do
     assert Enum.count(deck) == 52 - count_hands * count_cards
   end
 
-  test "When asked to deal more cards than available, returns a warning" do
+  test "When asked to deal more cards than available, returns a warning, the hands as dealt, and the original deck" do
     deck = Deck.new()
     count_hands = :rand.uniform(3) + 2
     count_cards = 18
-    {:insufficient_deck, hands, deck} = Deck.deal(deck, count_hands, count_cards)
-    assert Enum.count(deck) == 0
+    {:insufficient_deck, hands, returned_deck} = Deck.deal(deck, count_hands, count_cards)
+    assert returned_deck == deck
 
     assert Enum.count(hands) == count_hands
 

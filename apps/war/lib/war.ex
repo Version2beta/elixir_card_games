@@ -27,7 +27,7 @@ defmodule War do
   defp value({rank, _suit}), do: Keyword.get(@ranks_and_values, rank, 0)
 
   @spec war :: :player_1 | :player_2
-  def war(decks \\ 1) do
+  def war(decks \\ 1) when is_integer(decks) and decks > 0 do
     {:ok, [hand1, hand2], []} =
       Deck.new(decks)
       |> Deck.shuffle()

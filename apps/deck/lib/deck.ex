@@ -86,8 +86,17 @@ defmodule Deck do
     end
   end
 
+  @spec to_notation(nil) :: binary
+  def to_notation(nil), do: "nil"
+
+  @spec to_notation(card) :: binary
+  def to_notation(card) when is_tuple(card), do: to_notation(:string, [card])
+
+  @spec to_notation(:string, card) :: binary
+  def to_notation(:string, card) when is_tuple(card), do: to_notation(:string, [card])
+
   @spec to_notation(list(cards)) :: binary()
-  def to_notation(cards), do: to_notation(:string, cards)
+  def to_notation(cards) when is_list(cards), do: to_notation(:string, cards)
 
   @spec to_notation(:string, list(cards)) :: binary()
   def to_notation(:string, cards) do
